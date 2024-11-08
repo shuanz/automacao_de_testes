@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: "https://github.com/${GITHUB_USERNAME}/automacao_de_testes.git"
+            }
+        }
+        
+        stage('Setup') {
+            steps {
+                sh '''
+                    cd ferramentas/02_selenium_exercise
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt
+                '''
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh '''
+                    cd ferramentas/02_selenium_exercise
+                    python -m pytest test_selenium.py --headless=true
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            junit '**/test-results/*.xml'
+        }
+    }
+}
